@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { Hello } from "./components/Hello";
 import { connect } from 'socket.io-client';
 
-const socket = connect(`${location.protocol}//${location.host}`);
+const socket = connect(`${location.protocol}//${location.host}/?token=123`);
 
 socket.on('connect', function(){
     console.log("connect!");

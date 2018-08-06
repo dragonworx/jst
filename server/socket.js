@@ -11,16 +11,17 @@ class SocketServer {
   }
 
   initConnections () {
-    this.io.use((socket, next) => {
-      // let token = socket.handshake.query.token;
-      if (/*isValid(token)*/true) {
+    this.io.use((client, next) => {
+      let token = client.handshake.query.token;
+      console.log('token:', token);
+      if (token === 'abc') {
         return next();
       }
       return next(new Error('authentication error'));
     });
     
     this.io.on('connection', (client) => {
-      // let token = socket.handshake.query.token;
+      let token = client.handshake.query.token;
       console.log("connection!");
       setTimeout(() => this.emit('event', {x:1}), 2001);
       

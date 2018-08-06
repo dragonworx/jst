@@ -5,7 +5,7 @@ const static = require('serve-static');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const path = require('path');
-const SocketServer = require('./socket-server');
+const SocketServer = require('./socket');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 
 app.use(static('public'));
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.resolve(__dirname, '../public', 'favicon.ico')));
 
 // app.get('/', (req, res, next) => {
   //   res.send(200, 'ok');

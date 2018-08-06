@@ -5,11 +5,16 @@
   "main": "server.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/generator": "^7.0.0-beta.56",
+    "@babel/parser": "^7.0.0-beta.56",
     "@types/react": "^16.4.7",
     "@types/react-dom": "^16.0.6",
     "@types/socket.io-client": "^1.4.32",
     "body-parser": "^1.18.3",
+    "dependency-tree": "^6.1.1",
     "express": "^4.16.3",
+    "findit": "^2.0.0",
+    "jsel": "^1.1.6",
     "morgan": "^1.9.0",
     "serve-favicon": "^2.5.0",
     "serve-static": "^1.13.2",
@@ -26,7 +31,8 @@
   },
   "scripts": {
     "build": "./node_modules/.bin/webpack",
-    "build-watch": "./node_modules/.bin/webpack --watch",
-    "serve-dev": "nodemon --watch src --watch socket-server.js ./server"
+    "build-dev": "./node_modules/.bin/webpack --watch",
+    "serve-dev": "nodemon --watch server ./server/index",
+    "test": "node index"
   }
 }
