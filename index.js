@@ -3,9 +3,9 @@ const SourceFile = require('./astQuery/sourceFile');
 const walk = require('./astQuery/walk');
 const fs = require('fs');
 
-// const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages';
+const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages';
 // const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/editor/editor-core/__tests__/analytics/decorator.ts';
-const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/media';
+// const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/media';
 // const queryPath = './temp/test/exports-cjs-cases.js';
 
 const exclude = [
@@ -31,6 +31,9 @@ const print = val => console.log(JSON.stringify(val, null, 4));
 
 console.clear();
 
+const json = [];
+let fileCount = 0;
+
 walk(queryPath)
   .then(paths => {
     paths.forEach(filePath => {
@@ -38,13 +41,10 @@ walk(queryPath)
         console.log('excluded: '+  filePath);
         return;
       }
-      // add to exclude...
-      if (!loadedExclude.length) {
-        fs.appendFileSync(excludePath, filePath + '\n');
-      }
+      fileCount++;
       const options = {
         plugins: [],
-        track: true,
+        track: false,
         log: false,
       };
       const ext = path.extname(filePath).substr(1);
@@ -58,17 +58,25 @@ walk(queryPath)
           options.plugins.push('jsx');
         }
         options.plugins.push('classProperties', 'objectRestSpread');
+        // add to exclude...
+        console.log(`[${fileCount}]${filePath} [${options.plugins.join(',')}]`);
         const sourceFile = new SourceFile(filePath, options);
         const deps = sourceFile.getDependencies();
-        const exports = sourceFile.getExports();
-        console.log('deps: ' + deps.length, 'exports: ' + exports.length);
-        // print(exports);
+        json.push({
+          file: filePath,
+          deps,
+          plugins: options.plugins,
+        });
+        if (!fs.existsSync('./exclude.pause.txt')) {
+          fs.appendFileSync(excludePath, filePath + '\n');
+        }
       } catch (e) {
         console.log(filePath);
         console.log(e.message, e.loc);
         throw e;
       }
     });
+    fs.writeFileSync('./walk.json', JSON.stringify(json, null, 4));
     console.log(paths.length + ' files parsed!');
   })
   .catch(e => {

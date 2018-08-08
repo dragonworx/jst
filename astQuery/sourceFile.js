@@ -16,8 +16,27 @@ class SourceFile {
   }
 
   getDependencies () {
+    const ins = this.getImports();
+    const outs = this.getExports();
+    return {
+      ins: {
+        length: ins.length,
+        es6: ins.filter(dep => dep.lang === 'es6'),
+        cjs: ins.filter(dep => dep.lang === 'cjs'),
+      },
+      outs: {
+        length: outs.length,
+        es6: outs.filter(dep => dep.lang === 'es6'),
+        cjs: outs.filter(dep => dep.lang === 'cjs'),
+      },
+    };
+  }
+
+  getImports () {
     const array = this.getES6Imports();
     array.push.apply(array, this.getCommonJSRequires());
+    const es6 = array.filter(dep => dep.lang === 'es6');
+    const cjs = array.filter(dep => dep.lang === 'es6');
     return array;
   }
 

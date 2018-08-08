@@ -134,6 +134,21 @@ const nodeInfo = node => {
     case "ThisExpression":
       // TODO...
       break;
+    case "TypeAlias":
+      // TODO...
+      break;
+    case "TSNonNullExpression":
+      // TODO...
+      break;
+    case "InterfaceDeclaration":
+      // TODO...
+      break;
+    case "TypeCastExpression":
+      // TODO...
+      break;
+    case "TSTypeAssertion":
+      // TODO...
+      break;
     default:
       console.log(node.$);
       throw new Error("Unknown export type '" + node.type + "'");
