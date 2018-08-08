@@ -15,7 +15,8 @@ const nodeInfo = node => {
       break;
       case "ClassExpression":
     case "ClassDeclaration":
-      info.name = node.select('Identifier/@name');
+      info.name = node.$.id ? node.$.id.name : null;
+      info.super = node.$.superClass ? node.$.superClass.__metaNode.select('Identifier/@name') : null;
       break;
     case "VariableDeclaration":
       const varNames = [];
@@ -76,18 +77,15 @@ const nodeInfo = node => {
       info.params = node.$.params.map(param => param.name);
       break;
     case "JSXElement":
-      // TODO...
-      // console.log(node.$);
+      info.todo = 'TODO...';
       info.jsx = '<jsx/>';
       break;
     case "TSInterfaceDeclaration":
-      // TODO...
-      // console.log(node.$);
+      info.todo = 'TODO...';
       info.name = node.$.id.name;
       break;
     case "TaggedTemplateExpression":
-      // TODO...
-      // console.log(node.$);
+      info.todo = 'TODO...';
       info.name = node.$.tag.name;
       info.quasi = nodeInfo(node.$.quasi.__metaNode);
       break;
@@ -100,54 +98,47 @@ const nodeInfo = node => {
       info.consequent = nodeInfo(node.$.consequent.__metaNode);
       break;
     case "TSTypeAliasDeclaration":
-      // TODO...
-      // console.log(node.$); throw new Error("!!!");
+      info.todo = 'TODO...';
       info.name = node.$.id.name;
       break;
     case "TSAsExpression":
-      // TODO...
-      // console.log(node.$); throw new Error("!!!");
-      // info.name = node.$.id.name;
+      info.todo = 'TODO...';
       break;
     case "TSDeclareFunction":
-      // TODO...
-      // console.log(node.$); throw new Error("!!!");
-      // info.name = node.$.id.name;
+      info.todo = 'TODO...';
       break;
     case "AwaitExpression":
-      // TODO...
-      // console.log(node.$); throw new Error("!!!");
-      // info.name = node.$.id.name;
+      info.todo = 'TODO...';
       break;
     case "AssignmentExpression":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "TSEnumDeclaration":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "SpreadElement":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "UpdateExpression":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "ThisExpression":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "TypeAlias":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "TSNonNullExpression":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "InterfaceDeclaration":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "TypeCastExpression":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     case "TSTypeAssertion":
-      // TODO...
+      info.todo = 'TODO...';
       break;
     default:
       console.log(node.$);

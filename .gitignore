@@ -3,4 +3,5 @@ node_modules
 */*.log
 .vscode
 exclude.txt
+exclude.pause.txt
 walk.json

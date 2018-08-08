@@ -1,11 +1,21 @@
 const fs = require('fs');
 const Parser = require('./parser');
+const path = require('path');
 
 // replicate set.add
 const setAdd = (item, collection) => {
   if (collection.indexOf(item) === -1) {
     collection.push(item);
   }
+};
+
+const resolvePath = (filePath, baseFilePath, resolvePath) => {
+  if (resolvePath) {
+    // todo: resolve
+    const basePath = path.dirname(baseFilePath);
+    return path.resolve(basePath, filePath);
+  }
+  return filePath;
 };
 
 class SourceFile {
@@ -18,7 +28,7 @@ class SourceFile {
   getDependencies () {
     const ins = this.getImports();
     const outs = this.getExports();
-    return {
+    const deps = {
       ins: {
         length: ins.length,
         es6: ins.filter(dep => dep.lang === 'es6'),
@@ -30,6 +40,13 @@ class SourceFile {
         cjs: outs.filter(dep => dep.lang === 'cjs'),
       },
     };
+    deps.hasES6In = !!(deps.ins.es6.length);
+    deps.hasES6Out = !!(deps.ins.es6.length);
+    deps.hasCJSIn = !!(deps.ins.es6.length);
+    deps.hasCJSOut = !!(deps.ins.es6.length);
+    deps.hasES6 = !!(deps.hasES6In || deps.hasES6Out);
+    deps.hasCJS = !!(deps.hasCJSIn || deps.hasCJSOut);
+    return deps;
   }
 
   getImports () {
@@ -92,7 +109,7 @@ class SourceFile {
       "ExportNamedDeclaration": node => {
         const specifiers = node.$.specifiers;
         const declaration = node.$.declaration && node.$.declaration.__metaNode;
-        const source = node.$.source ? node.$.source.value : null;
+        const source = node.$.source ? resolvePath(node.$.source.value, this.filePath, this.options.resolvePaths) : null;
         let info;
         if (declaration) {
           info = {
@@ -106,7 +123,7 @@ class SourceFile {
         array.push({ lang: 'es6', type: 'named', info, source });
       },
       "ExportAllDeclaration": node => {
-        const source = node.$.source.value;
+        const source = resolvePath(node.$.source.value, this.filePath, this.options.resolvePaths);
         array.push({ lang: 'es6', type: 'all', source });
       }
     });
@@ -115,10 +132,17 @@ class SourceFile {
 
   getCommonJSExports () {
     const array = [];
-    const expressions = this.select({
-      "ExpressionStatement/AssignmentExpression": node => {
-        const info = node.$.right.__metaNode.info();
-        array.push({ lang: 'cjs', type: 'exports', info });
+    this.select({
+      "AssignmentExpression": node => {
+        if (node.$.left.type === 'MemberExpression') {
+          const expression = node.$.left;
+          const isModule = !!(expression.object && expression.object.name === 'module');
+          const isExports = !!(expression.property && expression.property.name === 'exports');
+          if (isModule && isExports) {
+            const info = node.$.right.__metaNode.info();
+            array.push({ lang: 'cjs', value: info });
+          }
+        }
       }
     });
     return array;
