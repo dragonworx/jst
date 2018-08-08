@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Parser = require('./parser');
-const log = require('../lib/log');
 
+// replicate set.add
 const setAdd = (item, collection) => {
   if (collection.indexOf(item) === -1) {
     collection.push(item);
@@ -15,12 +15,103 @@ class SourceFile {
     this.options = parseOptions;
   }
 
+  getDependencies () {
+    const array = this.getES6Imports();
+    array.push.apply(array, this.getCommonJSRequires());
+    return array;
+  }
+
+  getExports () {
+    const array = this.getES6Exports();
+    array.push.apply(array, this.getCommonJSExports());
+    return array;
+  }
+
+  getES6Imports () {
+    const array = [];
+    this.select({
+      "ImportDeclaration": node => {
+        const src = node.select('StringLiteral/@value');
+        node.select({
+          "ImportDefaultSpecifier": node => array.push({ lang: 'es6', type: 'default', name: node.$.local.name, path: src }),
+          "ImportSpecifier": node => array.push({ lang: 'es6', type: 'named', name: node.$.imported.name, path: src }),
+          "ImportNamespaceSpecifier": node => array.push({ lang: 'es6', type: 'namespace', name: node.$.local.name, path: src }),
+        });
+      }
+    });
+    return array;
+  }
+
+  getCommonJSRequires () {
+    const array = [];
+    this.select({
+      "CallExpression/Identifier[@name = 'require']": node => {
+        const src = node.parent.$.arguments[0].value;
+        if (node.parent.parent.is('ExpressionStatement')) {
+          array.push({ lang: 'cjs', type: 'expression', path: src });
+        } else if (node.parent.parent.is('VariableDeclarator')) {
+          if (node.parent.parent.$.id.type === 'Identifier') {
+            array.push({ lang: 'cjs', type: 'default', name: node.parent.parent.$.id.name, path: src });
+          } else if (node.parent.parent.$.id.type === 'ObjectPattern') {
+            const properties = node.parent.parent.select('ObjectProperty');
+            properties.forEach(property => array.push({ lang: 'cjs', type: 'named', name: property.$.key.name, path: src }));
+          }
+        }
+      }
+    });
+    return array;
+  }
+
+  getES6Exports () {
+    const array = [];
+    this.select({
+      "ExportDefaultDeclaration": node => {
+        const declaration = node.$.declaration.__metaNode;
+        const info = declaration.info();
+        array.push({ lang: 'es6', type: 'default', info });
+      },
+      "ExportNamedDeclaration": node => {
+        const specifiers = node.$.specifiers;
+        const declaration = node.$.declaration && node.$.declaration.__metaNode;
+        const source = node.$.source ? node.$.source.value : null;
+        let info;
+        if (declaration) {
+          info = {
+            declaration: declaration.info()
+          };
+        } else if (specifiers) {
+          info = {
+            specifiers: node.select('ExportSpecifier').map(specifier => specifier.$.exported.name)
+          };
+        }
+        array.push({ lang: 'es6', type: 'named', info, source });
+      },
+      "ExportAllDeclaration": node => {
+        const source = node.$.source.value;
+        array.push({ lang: 'es6', type: 'all', source });
+      }
+    });
+    return array;
+  }
+
+  getCommonJSExports () {
+    const array = [];
+    const expressions = this.select({
+      "ExpressionStatement/AssignmentExpression": node => {
+        const info = node.$.right.__metaNode.info();
+        array.push({ lang: 'cjs', type: 'exports', info });
+      }
+    });
+    return array;
+  }
+
   select (query) {
     if (!this.parser) {
       const options = this.options;
-      this.parser = new Parser(this.source, this.filePath, this.options);
+      const parser = new Parser(this.source, this.filePath, this.options);
+      this.parser = parser;
       try {
-        this.parser.parse();
+        parser.parse();
       } catch (e) {
         if (!options.plugins) {
           options.plugins = [];
@@ -34,7 +125,7 @@ class SourceFile {
         }
         if (options.plugins.length > originalPluginCount) {
           try {
-            this.parser.parse();
+            parser.parse();
           } catch (ee) {
             throw ee;
           }
@@ -42,50 +133,9 @@ class SourceFile {
           throw e;
         }
       }
-
-      this.parser.resetScope();
-      this.processQuery(query, this.parser.rootMetaNode);
     }
-  }
-
-  processQuery (query, metaNode, level = 0) {
-    const { parser } = this;
-    parser.setMetaScope(metaNode);
-    const pad = '.'.repeat(level);
-    Object.keys(query).forEach(key => {
-      const queryValue = query[key];
-      const xpath = (key.substr(0, 2) === '//' ? '' : '//') + key;
-      if (this.options.debug) {
-        log(pad + 'scope', parser.metaNode.id, 'blue');
-        log(pad + 'xpath', xpath, 'magenta');
-      }
-      const nodes = parser.selectAll(xpath);
-      const wasResult = nodes && nodes.length;
-      if (this.options.debug) {
-        log(pad + 'count', nodes ? nodes.length : 0, wasResult ? 'green' : 'red');
-      }
-      if (wasResult) {
-        if (typeof queryValue === 'function') {
-          // pass results to function
-          const result = {
-            nodes,
-            parser,
-          };
-          for (let i = 0; i < nodes.length; i++) {
-            result.node = nodes[i];
-            result.i = i;
-            queryValue(result);
-          }
-        } else if (typeof queryValue === 'object') {
-          for (let i = 0; i < nodes.length; i++) {
-            const metaNode = nodes[i].__metaNode;
-            parser.push(metaNode);
-            this.processQuery(queryValue, metaNode, level + 1);
-            parser.pop();
-          }
-        }
-      }
-    });
+    this.parser.resetScope();
+    return this.parser.processQuery(query, this.parser.rootMetaNode);
   }
 }
 

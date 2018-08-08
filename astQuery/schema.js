@@ -16,6 +16,9 @@ module.exports = schema = {
   },
   
   attributes (metaNode) {
+    if (!metaNode) {
+      this.toString();
+    }
     const astNode = metaNode.astNode;
     const attribs = {};
     for (let key in astNode) {

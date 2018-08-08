@@ -98,7 +98,7 @@ module.exports = class Parser {
       return astNode.__metaNode;
     }
 
-    const metaNode = new MetaNode(astNode);
+    const metaNode = new MetaNode(astNode, this);
     metaNode.level = level;
     astNode.__metaNode = metaNode;
     const nodeType = metaNode.type;
@@ -109,6 +109,7 @@ module.exports = class Parser {
   
     if (nodeType) {
       if (parentMetaNode) {
+        metaNode.parent = parentMetaNode;
         if (this.options.debug) {
           log('parent', parentMetaNode.id, 'red');
         }
@@ -140,7 +141,7 @@ module.exports = class Parser {
         // TODO: need to handle nulls? /Users/achamas/ms/atlaskit-mk-2/packages/editor/editor-bitbucket-transformer/src/serializer.ts:80
         return;
       }
-      this.visit(childNode, level + 1, metaNode)
+      this.visit(childNode, level + 1, metaNode);
     });
   
     return metaNode;
@@ -151,9 +152,6 @@ module.exports = class Parser {
     dom.schema(schema);
     dom.map(map);
     const result = dom.select(xpath);
-    if (result instanceof MetaNode) {
-      return result.astNode;
-    }
     return result;
   }
 
@@ -162,7 +160,7 @@ module.exports = class Parser {
     dom.schema(schema);
     dom.map(map);
     const result = dom.selectAll(xpath);
-    return result.map(node => node instanceof MetaNode ? node.astNode : node);
+    return result;
   }
 
   push (metaNode) {
@@ -186,5 +184,54 @@ module.exports = class Parser {
   snippet (src) {
     const tempParser = new Parser(`function scope() { ${src} }`, null, this.options);
     return tempParser.selectAll('//BlockStatement/*');
+  }
+
+  processQuery (query, metaNode, level = 0) {
+    const { parser } = this;
+    this.setMetaScope(metaNode);
+    const pad = '.'.repeat(level);
+    let queryResult = null;
+    let inlineQueryKey = null;
+    if (typeof query === 'string') {
+      inlineQueryKey = query;
+      query = {};
+      query[inlineQueryKey] = result => queryResult = result;
+    }
+    Object.keys(query).forEach(key => {
+      const queryValue = query[key];
+      const xpath = ((key.substr(0, 2) === '//' || key.charAt(0) === '@') ? '' : '//') + key;
+      // const xpath = key;
+      if (this.options.debug) {
+        log(pad + 'scope', this.metaNode.id, 'blue');
+        log(pad + 'xpath', xpath, 'magenta');
+      }
+      const nodes = this.selectAll(xpath);
+      const wasResult = nodes && nodes.length;
+      if (this.options.debug) {
+        log(pad + 'count', nodes ? nodes.length : 0, wasResult ? 'green' : 'red');
+      }
+      if (wasResult) {
+        if (typeof queryValue === 'function') {
+          // pass results to function
+          if (inlineQueryKey === key) {
+            queryResult = nodes;
+          } else {
+            for (let i = 0; i < nodes.length; i++) {
+              queryValue(nodes[i]);
+            }
+          }
+          return;
+        } else if (typeof queryValue === 'object') {
+          for (let i = 0; i < nodes.length; i++) {
+            const metaNode = nodes[i].__metaNode;
+            this.push(metaNode);
+            this.processQuery(queryValue, metaNode, level + 1);
+            this.pop();
+          }
+        }
+      }
+    });
+    // return value for single string query
+    return queryResult;
   }
 };
