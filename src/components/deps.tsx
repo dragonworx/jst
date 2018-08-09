@@ -33,7 +33,7 @@ export class Deps extends React.Component<DepsProps, DepsState> {
   render() {
     const es6InPackages = this.es6InPackages;
 
-    const es6InPkg = [];
+    const es6InPkg = [ <img key="ins_img" src="/img/ins.png" /> ];
     for (let pkgName in es6InPackages) {
       const absPath = es6InPackages[pkgName].absPath;
       const names = es6InPackages[pkgName].names;
@@ -47,7 +47,7 @@ export class Deps extends React.Component<DepsProps, DepsState> {
     return (
       <div className="deps">
         <div className="ins">
-          <img src="/img/ins.png" />{es6InPkg}
+          {es6InPkg}
         </div>
       </div>
     );
