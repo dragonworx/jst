@@ -1,27 +1,24 @@
-const jsel = require('jsel');
-
 let i = 0;
 
-const nodeInfo = node => {
-  if (!node) {
-    this.toString();
-  }
+const nodeInfo = metaNode => {
+  const astNode = metaNode.$;
   const info = {
-    type: node.type
+    type: metaNode.type
   };
-  switch (node.type) {
+
+  switch (metaNode.type) {
     // imports
     case "ObjectExpression":
       break;
       case "ClassExpression":
     case "ClassDeclaration":
-      info.name = node.$.id ? node.$.id.name : null;
-      info.super = node.$.superClass ? node.$.superClass.__metaNode.select('Identifier/@name') : null;
+      info.name = astNode.id ? astNode.id.name : null;
+      info.super = astNode.superClass ? astNode.superClass.__metaNode.select('Identifier/@name') : null;
       break;
     case "VariableDeclaration":
       const varNames = [];
       const inits = [];
-      const declarations = node.select('VariableDeclarator');
+      const declarations = metaNode.select('VariableDeclarator');
       declarations.forEach(declaration => {
         varNames.push(declaration.$.id.name);
         inits.push(declaration.$.init ? nodeInfo(declaration.$.init.__metaNode): undefined);
@@ -31,50 +28,70 @@ const nodeInfo = node => {
       break;
     case "FunctionExpression":
     case "FunctionDeclaration":
-      info.name = node.$.id && node.$.id.name;
+      info.name = astNode.id && astNode.id.name;
+      const params = [];
+      astNode.params.forEach(param => {
+        switch (param.type) {
+          case "Identifier":
+            params.push(param.name);
+            break;
+          case "AssignmentPattern":
+            params.push(param.left.name);
+            break;
+          case "ObjectPattern":
+            param.properties.forEach(property => params.push(property.key.name));
+            break;
+        }
+      });
+      info.params = params;
+      try {
+        info.returnType = astNode.returnType.typeAnnotation.typeName.name;
+      } catch (e) {
+
+      }
       break;
     case "Identifier":
-      info.name = node.$.name;
+      info.name = astNode.name;
       break;
     case "CallExpression":
     case "NewExpression":
-      info.name = node.$.callee && node.$.callee.name;
-      info.arguments = node.$.arguments && node.$.arguments.map(arg => nodeInfo(arg.__metaNode));
+      info.name = astNode.callee && astNode.callee.name;
+      info.arguments = astNode.arguments && astNode.arguments.map(arg => nodeInfo(arg.__metaNode));
       break;
     case "BooleanLiteral":
     case "StringLiteral":
     case "NumericLiteral":
     case "NullLiteral":
-      info.value = node.$.value;
+      info.value = astNode.value;
       break;
     case "TemplateLiteral":
-      info.value = node.$.quasis && node.$.quasis.map(quasi => quasi.value.raw);
+      info.value = astNode.quasis && astNode.quasis.map(quasi => quasi.value.raw);
       break;
     case "RegExpLiteral":
-      info.value = node.$.pattern;
-      info.flags = node.$.flags;
+      info.value = astNode.pattern;
+      info.flags = astNode.flags;
       break;
     case "LogicalExpression":
     case "BinaryExpression":
-      info.operator = node.$.operator;
-      info.left = nodeInfo(node.$.left.__metaNode);
-      info.right = nodeInfo(node.$.right.__metaNode);
+      info.operator = astNode.operator;
+      info.left = nodeInfo(astNode.left.__metaNode);
+      info.right = nodeInfo(astNode.right.__metaNode);
       break;
     case "UnaryExpression":
       // TODO...
-      info.operator = node.$.operator;
+      info.operator = astNode.operator;
       break;
     case "MemberExpression":
-      info.object = node.$.object.name;
-      info.property = nodeInfo(node.$.property.__metaNode);
-      info.computed = node.$.computed;
-      info.optional = node.$.optional;
+      info.object = astNode.object.name;
+      info.property = nodeInfo(astNode.property.__metaNode);
+      info.computed = astNode.computed;
+      info.optional = astNode.optional;
       break;
     case "ArrowFunctionExpression":
-      info.generator = node.$.expression;
-      info.async = node.$.expression;
-      info.expression = node.$.expression;
-      info.params = node.$.params.map(param => param.name);
+      info.generator = astNode.expression;
+      info.async = astNode.expression;
+      info.expression = astNode.expression;
+      info.params = astNode.params.map(param => param.name);
       break;
     case "JSXElement":
       info.todo = 'TODO...';
@@ -82,24 +99,24 @@ const nodeInfo = node => {
       break;
     case "TSInterfaceDeclaration":
       info.todo = 'TODO...';
-      info.name = node.$.id.name;
+      info.name = astNode.id.name;
       break;
     case "TaggedTemplateExpression":
       info.todo = 'TODO...';
-      info.name = node.$.tag.name;
-      info.quasi = nodeInfo(node.$.quasi.__metaNode);
+      info.name = astNode.tag.name;
+      info.quasi = nodeInfo(astNode.quasi.__metaNode);
       break;
     case "ArrayExpression":
-      info.elements = node.$.elements.map(element => nodeInfo(element.__metaNode));
+      info.elements = astNode.elements.map(element => nodeInfo(element.__metaNode));
       break;
     case "ConditionalExpression":
-      info.test = nodeInfo(node.$.test.__metaNode);
-      info.alternate = nodeInfo(node.$.alternate.__metaNode);
-      info.consequent = nodeInfo(node.$.consequent.__metaNode);
+      info.test = nodeInfo(astNode.test.__metaNode);
+      info.alternate = nodeInfo(astNode.alternate.__metaNode);
+      info.consequent = nodeInfo(astNode.consequent.__metaNode);
       break;
     case "TSTypeAliasDeclaration":
       info.todo = 'TODO...';
-      info.name = node.$.id.name;
+      info.name = astNode.id.name;
       break;
     case "TSAsExpression":
       info.todo = 'TODO...';
@@ -141,8 +158,8 @@ const nodeInfo = node => {
       info.todo = 'TODO...';
       break;
     default:
-      console.log(node.$);
-      throw new Error("Unknown export type '" + node.type + "'");
+      console.log(astNode);
+      throw new Error("Unknown export type '" + metaNode.type + "'");
   }
   return info;
 };

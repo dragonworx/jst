@@ -46,10 +46,6 @@ img {
   font-size: 86%;
 }
 
-.ins {
-
-}
-
 .deps-set {
   display: inline-block;
   white-space: nowrap;
@@ -82,4 +78,40 @@ img {
 .package-usedname:last-child {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+
+.outs .package {
+  font-weight: bold;
+  background-color: #c2dfea;
+  color: #2000ff;
+}
+
+.outs .package-usedname {
+  font-weight: normal;
+  color: white;
+  background-color: #7cb8d6;
+  border: 2px solid #c2dfea;
+}
+
+.ins, .outs {
+  color: white;
+  padding-left: 50px;
+  position: relative;
+}
+
+.ins_label, .outs_label {
+  color: white;
+  min-width: 32px;
+  display: inline-block;
+}
+
+.dep_label {
+  color: white;
+  position: absolute;
+  left: 5px;
+  top: 7px;
+}
+
+.ins .dep_label {
+  left: 12px;
 }
