@@ -11,7 +11,7 @@ export class File extends React.Component<FileProps, {}> {
     
     return (
       <div className="file">
-        <a id={file.path}></a>
+        <a id={file.path && file.path.split('.')[0]}></a>
         <img src={`/img/file.png`} />{file.path.split('/').pop()}
         <Deps deps={file.deps} />
       </div>

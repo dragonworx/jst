@@ -65,10 +65,11 @@ class SourceFile {
     this.select({
       "ImportDeclaration": node => {
         const src = node.select('StringLiteral/@value');
+        const absSrc = src && (src[0].charAt(0) === '.' || src[0].charAt(0) === '/') && resolvePath(src[0], this.filePath, true);
         node.select({
-          "ImportDefaultSpecifier": node => array.push({ lang: 'es6', type: 'default', name: node.$.local.name, path: src }),
-          "ImportSpecifier": node => array.push({ lang: 'es6', type: 'named', name: node.$.imported.name, path: src }),
-          "ImportNamespaceSpecifier": node => array.push({ lang: 'es6', type: 'namespace', name: node.$.local.name, path: src }),
+          "ImportDefaultSpecifier": node => array.push({ lang: 'es6', type: 'default', name: node.$.local.name, path: src && src[0], absPath: absSrc }),
+          "ImportSpecifier": node => array.push({ lang: 'es6', type: 'named', name: node.$.imported.name, path: src && src[0], absPath: absSrc }),
+          "ImportNamespaceSpecifier": node => array.push({ lang: 'es6', type: 'namespace', name: node.$.local.name, path: src && src[0], absPath: absSrc }),
         });
       }
     });
