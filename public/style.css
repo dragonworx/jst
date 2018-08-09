@@ -1,0 +1,85 @@
+/* .container {
+  position: absolute;
+  left: 0;
+  top: 0;
+} */
+
+* {
+  box-sizing: content-box;
+}
+
+body {
+  font-family: monospace;
+}
+
+.directory {
+  border-bottom: 1px solid #8e8e8e91;
+  border-top: 1px solid #ffffff29;
+  background-color: rgba(0,0,0,0.05)
+}
+
+.title {
+  cursor: pointer;
+  user-select: none;
+}
+
+img {
+  vertical-align: middle;
+}
+
+.title img, .file img {
+  margin-right: 7px;
+}
+
+.subDirs {
+  padding-left: 5px;
+}
+
+.file {
+  color: blue;
+  padding-left: 21px;
+  font-weight: bold;
+}
+
+.deps {
+  margin-left: 24px;
+  font-size: 86%;
+}
+
+.ins {
+
+}
+
+.deps-set {
+  display: inline-block;
+  white-space: nowrap;
+  margin-right: 10px;
+  line-height: 2.7;
+  font-weight: normal;
+}
+
+.package {
+  background-color: white;
+  margin-left: 10px;
+  padding: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  color: #485fa5;
+}
+
+.package:first-child {
+  margin-left: 0;
+}
+
+.package-usedname {
+  background-color: #c9e7e8;
+  padding: 3px;
+  border: 2px solid #fff;
+  border-left: none;
+  font-weight: bold;
+}
+
+.package-usedname:last-child {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}

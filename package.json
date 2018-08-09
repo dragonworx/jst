@@ -10,6 +10,7 @@
     "@types/react": "^16.4.7",
     "@types/react-dom": "^16.0.6",
     "@types/socket.io-client": "^1.4.32",
+    "bin-pack": "^1.0.2",
     "body-parser": "^1.18.3",
     "chalk": "^2.4.1",
     "express": "^4.16.3",
@@ -32,7 +33,7 @@
   "scripts": {
     "build": "./node_modules/.bin/webpack",
     "build-dev": "./node_modules/.bin/webpack --watch",
-    "serve-dev": "nodemon --watch server ./server/index",
+    "serve-dev": "nodemon --watch ./server ./server/index.js",
     "start": "node index"
   }
 }

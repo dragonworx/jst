@@ -2,9 +2,9 @@ const fs = require('fs');
 const chalk = require('chalk');
 const scan = require('./astQuery');
 
-const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages';
+// const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages';
 // const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/core/polyfills/string-prototype-includes.js';
-// const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/media';
+const queryPath = '/Users/achamas/ms/atlaskit-mk-2/packages/media';
 // const queryPath = './temp/test/exports-cjs-cases.js';
 
 const excludePaths = [
@@ -19,7 +19,7 @@ console.clear();
 
 scan(queryPath, excludePaths)
   .then(data => {
-    fs.writeFileSync('./scan.json', JSON.stringify(data, null, 4));
+    fs.writeFileSync('./data.json', JSON.stringify(data, null, 4));
     console.log('done.');
   })
   .catch(e => {

@@ -5,11 +5,12 @@ const static = require('serve-static');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const path = require('path');
-const SocketServer = require('./socket');
+const SocketServer = require('./socketServer');
+const data = require('../data.json');
 
 const app = express();
 const server = http.createServer(app);
-const socketServer = new SocketServer(server);
+const socket = new SocketServer(server);
 
 app.use(morgan('dev'));
 
@@ -33,6 +34,11 @@ app.use(favicon(path.resolve(__dirname, '../public', 'favicon.ico')));
 //   res.setHeader('Content-Type', 'text/javascript');
 //   res.send('200', script);
 // });
+
+socket.on('connect', client => {
+  console.log("connection!!");
+  socket.send('data', data);
+});
 
 server.listen(3000);
 

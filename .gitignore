@@ -4,4 +4,4 @@ node_modules
 .vscode
 exclude.txt
 exclude.pause.txt
-scan.json
+data.json

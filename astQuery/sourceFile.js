@@ -11,7 +11,6 @@ const setAdd = (item, collection) => {
 
 const resolvePath = (filePath, baseFilePath, resolvePath) => {
   if (resolvePath) {
-    // todo: resolve
     const basePath = path.dirname(baseFilePath);
     return path.resolve(basePath, filePath);
   }
@@ -40,20 +39,18 @@ class SourceFile {
         cjs: outs.filter(dep => dep.lang === 'cjs'),
       },
     };
-    deps.hasES6In = !!(deps.ins.es6.length);
-    deps.hasES6Out = !!(deps.ins.es6.length);
-    deps.hasCJSIn = !!(deps.ins.es6.length);
-    deps.hasCJSOut = !!(deps.ins.es6.length);
-    deps.hasES6 = !!(deps.hasES6In || deps.hasES6Out);
-    deps.hasCJS = !!(deps.hasCJSIn || deps.hasCJSOut);
+    // deps.hasES6In = !!(deps.ins.es6.length);
+    // deps.hasES6Out = !!(deps.outs.es6.length);
+    // deps.hasCJSIn = !!(deps.ins.cjs.length);
+    // deps.hasCJSOut = !!(deps.outs.cjs.length);
+    // deps.hasES6 = !!(deps.hasES6In || deps.hasES6Out);
+    // deps.hasCJS = !!(deps.hasCJSIn || deps.hasCJSOut);
     return deps;
   }
 
   getImports () {
     const array = this.getES6Imports();
     array.push.apply(array, this.getCommonJSRequires());
-    const es6 = array.filter(dep => dep.lang === 'es6');
-    const cjs = array.filter(dep => dep.lang === 'es6');
     return array;
   }
 
@@ -109,7 +106,8 @@ class SourceFile {
       "ExportNamedDeclaration": node => {
         const specifiers = node.$.specifiers;
         const declaration = node.$.declaration && node.$.declaration.__metaNode;
-        const source = node.$.source ? resolvePath(node.$.source.value, this.filePath, this.options.resolvePaths) : null;
+        const source = node.$.source ? resolvePath(node.$.source.value, this.filePath, false) : null;
+        const absSource = source && resolvePath(source, this.filePath, true);
         let info;
         if (declaration) {
           info = {
@@ -120,11 +118,12 @@ class SourceFile {
             specifiers: node.select('ExportSpecifier').map(specifier => specifier.$.exported.name)
           };
         }
-        array.push({ lang: 'es6', type: 'named', info, source });
+        array.push({ lang: 'es6', type: 'named', info, source, absSource });
       },
       "ExportAllDeclaration": node => {
-        const source = resolvePath(node.$.source.value, this.filePath, this.options.resolvePaths);
-        array.push({ lang: 'es6', type: 'all', source });
+        const source = resolvePath(node.$.source.value, this.filePath, false);
+        const absSource = source && resolvePath(source, this.filePath, true);
+        array.push({ lang: 'es6', type: 'all', source, absSource });
       }
     });
     return array;

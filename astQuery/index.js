@@ -45,7 +45,6 @@ module.exports = function scan (queryPath, excludePaths = []) {
         plugins: [],
         track: false,
         log: false,
-        resolvePaths: true,
       };
 
       const ext = path.extname(filePath).substr(1);
@@ -65,7 +64,7 @@ module.exports = function scan (queryPath, excludePaths = []) {
         const sourceFile = new SourceFile(filePath, options);
         const deps = sourceFile.getDependencies();
         data.files.push({
-          file: filePath,
+          path: filePath,
           deps,
           plugins: options.plugins,
         });
