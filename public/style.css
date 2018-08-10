@@ -15,7 +15,7 @@ body {
 .directory {
   border-bottom: 1px solid #8e8e8e91;
   border-top: 1px solid #ffffff29;
-  background-color: rgba(0,0,0,0.05)
+  /* background-color: rgba(0,0,0,0.03); */
 }
 
 .title {
@@ -44,23 +44,28 @@ img {
 .deps {
   margin-left: 24px;
   font-size: 86%;
+  position: relative;
 }
 
 .deps-set {
-  display: inline-block;
+  display: block;
   white-space: nowrap;
   margin-right: 10px;
-  line-height: 2.7;
+  line-height: 1.7;
   font-weight: normal;
 }
 
 .package {
   background-color: white;
   margin-left: 10px;
-  padding: 5px;
+  padding: 1px 3px;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
   color: #485fa5;
+}
+
+.package b {
+  font-weight: normal;
 }
 
 .package:first-child {
@@ -68,11 +73,12 @@ img {
 }
 
 .package-usedname {
-  background-color: #c9e7e8;
-  padding: 3px;
-  border: 2px solid #fff;
+  background-color: #d6d6d6;
+  padding: 0 3px;
+  border: 1px solid #fff;
   border-left: none;
-  font-weight: bold;
+  font-weight: normal;
+  color: #0060fb;
 }
 
 .package-usedname:last-child {
@@ -81,7 +87,7 @@ img {
 }
 
 .outs .package {
-  font-weight: bold;
+  font-weight: normal;
   background-color: #c2dfea;
   color: #2000ff;
 }
@@ -90,13 +96,25 @@ img {
   font-weight: normal;
   color: white;
   background-color: #7cb8d6;
-  border: 2px solid #c2dfea;
+  border: 1px solid #c2dfea;
 }
 
 .ins, .outs {
   color: white;
   padding-left: 50px;
   position: relative;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color: #eae7e7;
+}
+
+.deps_gutter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background-color: red;
 }
 
 .ins_label, .outs_label {
@@ -106,12 +124,17 @@ img {
 }
 
 .dep_label {
-  color: white;
+  color: #9a9a9a;
   position: absolute;
   left: 5px;
-  top: 7px;
+  top: 50%;
+  margin-top: -10px;
 }
 
 .ins .dep_label {
   left: 12px;
+}
+
+.highlight {
+  background-color: yellow;
 }

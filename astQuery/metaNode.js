@@ -39,7 +39,7 @@ const nodeInfo = metaNode => {
             params.push(param.left.name);
             break;
           case "ObjectPattern":
-            param.properties.forEach(property => params.push(property.key.name));
+            param.properties.forEach(property => params.push(property.key && property.key.name));
             break;
         }
       });

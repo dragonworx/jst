@@ -56,6 +56,24 @@ export class Deps extends React.Component<DepsProps, DepsState> {
     this.es6Outs = es6Outs;
   }
 
+  onAnchorClick (anchor) {
+    return e => {
+      const target = document.querySelector(`a[id = "${anchor}"]`);
+      const el = target.nextElementSibling.nextElementSibling;
+      const y = el.getBoundingClientRect().top;
+      let behavior:any = 'auto';
+      if ((y < 0 && Math.abs(y) < window.innerHeight * 3) || (y > 0 && y - window.innerHeight < window.innerHeight * 3)) {
+        behavior = 'smooth';
+      }
+      el.scrollIntoView({
+        behavior: behavior,
+      });
+      el.classList.add('highlight');
+      setTimeout(() => el.classList.remove('highlight'), 2500);
+      e.preventDefault();
+    };
+  }
+
   render() {
     const { es6InPackages, es6Outs } = this;
 
@@ -67,7 +85,7 @@ export class Deps extends React.Component<DepsProps, DepsState> {
       const names = es6InPackages[pkgName].names;
       const children = [];
       const firstChar = pkgName.charAt(0);
-      children.push(<span key={pkgName} className="package">{(firstChar === '.' || firstChar === '/') ? <a href={`#${absPath}`}>{pkgName}</a> : <b>{pkgName}</b>}</span>);
+      children.push(<span key={pkgName} className="package">{(firstChar === '.' || firstChar === '/') ? <a href={`#${absPath}`} onClick={this.onAnchorClick(absPath)}>{pkgName}</a> : <b>{pkgName}</b>}</span>);
       names.forEach(usedName => children.push(<span key={pkgName + usedName} className="package-usedname">{usedName}</span>));
       es6InElements.push(<span key={pkgName + 'container'} className="deps-set">{children}</span>);
     }
@@ -77,7 +95,7 @@ export class Deps extends React.Component<DepsProps, DepsState> {
       if (info.path) {
         es6OutElements.push((
           <span key={info.path + 'container' + i} className="deps-set">
-            <span className="package"><a href={`#${info.absPath}`}>{info.path}</a></span>
+            <span className="package"><a href={`#${info.absPath}`} onClick={this.onAnchorClick(info.absPath)}>{info.path}</a></span>
           </span>
         ));
       } else if (info.type) {
@@ -92,12 +110,8 @@ export class Deps extends React.Component<DepsProps, DepsState> {
 
     return (
       <div className="deps">
-        <div className="ins">
-          {inKeys ? es6InElements : null}
-        </div>
-        <div className="outs">
-          {es6Outs.length ? es6OutElements : null}
-        </div>
+          { inKeys ? <div className="ins">{es6InElements}</div> : null }
+          { es6Outs.length ? <div className="outs">{es6OutElements}</div> : null }
       </div>
     );
   }

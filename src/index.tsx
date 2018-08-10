@@ -15,10 +15,8 @@ socket.on('data', data => {
         document.getElementById("root")
     );
 
-    setTimeout(() => {
-        const hash = location.hash.replace('#', '');
-        const el = document.querySelector(`a[id = "${hash}"]`);
-        console.log(hash);
-        el && el.scrollIntoView();
-    }, 0);
+    const hash = location.hash.replace('#', '');
+    const el = document.querySelector(`a[id = "${hash}"]`);
+    console.log(hash);
+    el && el.scrollIntoView();
 });
